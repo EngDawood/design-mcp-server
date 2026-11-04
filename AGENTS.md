@@ -19,21 +19,35 @@ The skills live in the owner's workspace at `~/workspace/custom-skills/<name>/SK
 
 ## Architecture rules
 
-- `src/core/provider.ts` is the seam. Its shape is fixed: change it only
-  with the project lead's approval, and never to fit one provider.
-- Everything specific to a source lives in `src/providers/<id>/`. The
-  core (`server.ts`, `registry.ts`, `worker.ts`) must stay source-agnostic.
-- The provider contract is `src/providers/README.md`. Read it before
-  adding or changing a provider.
-- Tool results: success = MCP text content with a JSON payload; failure =
-  error result with `{ "error": string }`. Handlers never throw.
+- `src/types.ts` is the seam: the unified `Asset` shape and the
+  `Provider` interface (`name`, `available`, `search`, optional
+  `getById`). Its shape is fixed: change it only with the project lead's
+  approval, and never to fit one provider.
+- The ONE sanctioned extension is `Provider.registerTools`: an escape
+  hatch for a provider whose value does not fit search/getById
+  (Storyset's palette/recolor tools). A new provider uses it only with
+  the lead's approval — search/getById first.
+- Everything specific to a source lives in `src/providers/<id>.ts`, with
+  its deep logic in `src/providers/<id>-core.ts` when it has any. The
+  core (`server.ts`, `worker.ts`, `tools/`, `utils/`) must stay
+  source-agnostic: cross-provider tools dispatch through the seam, never
+  through a source's internals.
+- Adding a provider = one module in `src/providers/` + one entry in
+  `src/providers/registry.ts` (+ its env key in `src/config.ts` when it
+  needs one).
+- A provider whose keys are missing reports `available = false` and
+  returns empty results — never an error, never a crash. The server
+  stays up.
+- Tool results follow the tool's own convention (cross-provider tools
+  return formatted text; `registerTools` tools return MCP text content
+  with a JSON payload, failures as error results with
+  `{ "error": string }`). Handlers never throw.
 
 ## Secrets
 
 - NEVER commit a secret, token, or API key — not in code, docs, tests, or
   commit messages. Provider keys are Worker secrets (`wrangler secret
-  put`) named in the provider's `requiresEnv`.
-- A provider with missing keys disables itself; the server must stay up.
+  put`), read only through `loadConfig(env)` in `src/config.ts`.
 
 ## Git
 

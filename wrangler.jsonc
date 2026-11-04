@@ -11,6 +11,13 @@
   "observability": {
     "enabled": true
   }
-  // Provider secrets (wrangler secret put) — never commit values:
-  // - FLATICON_API_KEY (flaticon provider; server stays up without it, provider disabled)
+  // Provider secrets (wrangler secret put) — never commit values. The
+  // server stays up without any of them; the affected provider is simply
+  // reported as not configured by list_providers:
+  // - FLATICON_API_KEY (Flaticon provider)
+  // - PEXELS_API_KEY, UNSPLASH_ACCESS_KEY, PIXABAY_API_KEY (stock photos)
+  // - LOGO_DEV_TOKEN (Logo.dev provider)
+  // Plain vars (wrangler vars, not secrets):
+  // - PUBLIC_ORIGIN (optional; lets Storyset recolor results link back to
+  //   a regeneration URL on this deployment)
 }
