@@ -3,6 +3,7 @@
   // Worker name matches the repo name by the owner's convention.
   // Deploy: bun run deploy (wrangler deploy). Node >= 20 required (.nvmrc pins 22).
   "name": "design-mcp-server",
+  "preview_urls": true,
   "main": "src/worker.ts",
   "compatibility_date": "2025-11-01",
   "compatibility_flags": ["nodejs_compat"],
