@@ -9,7 +9,10 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "issues": {
+      "enabled": true
+    }
   }
   // Provider secrets (wrangler secret put) — never commit values:
   // - FLATICON_API_KEY (flaticon provider; server stays up without it, provider disabled)
