@@ -78,6 +78,24 @@ MCP client config once deployed:
 { "mcpServers": { "design-mcp-server": { "url": "https://design-mcp-server.<account>.workers.dev/mcp" } } }
 ```
 
+## Previews
+
+Every pull request runs `.github/workflows/preview.yml`: install, `bun
+test`, and typecheck — then a **non-production preview** of the Worker is
+uploaded with `wrangler versions upload` and the workflow comments the
+preview URL (`https://<version-id>-design-mcp-server.<subdomain>.workers.dev`)
+on the PR, updating that same comment on every push. A version upload
+never promotes to production; production changes only on merge + deploy.
+
+The project lead smoke-tests each PR against its preview URL —
+`GET /health` plus an MCP `tools/list` — before merge.
+
+**Secrets gate:** previews deploy only once the owner adds
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub repo
+secrets. Until then the deploy step skips gracefully with a notice in
+the job summary (this is also what fork PRs always see) — tests and
+typecheck still run and gate the PR either way.
+
 ## Adding a provider
 
 Read `src/providers/README.md` — the contract — then implement

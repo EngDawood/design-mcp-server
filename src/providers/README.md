@@ -100,3 +100,4 @@ wrong or the provider is leaking; raise it with the project lead instead.
 - [ ] One import + one entry in `registry.ts`; no other core changes
 - [ ] README provider table updated (row: id, kinds, tools, keys)
 - [ ] Built with the Matt Pocock skills (`tdd` + `implement`, `codebase-design` vocabulary)
+- [ ] Preview received and smoke-tested: the preview workflow comments a non-production preview URL on the PR (once the owner has added the `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` repo secrets — until then the deploy step skips and only tests/typecheck gate the PR); the project lead checks `GET /health` + MCP `tools/list` against the preview URL before merge
