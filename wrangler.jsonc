@@ -1,0 +1,15 @@
+{
+  // design-mcp-server: multi-provider design-asset MCP server.
+  // Worker name matches the repo name by the owner's convention.
+  // Deploy: bun run deploy (wrangler deploy). Node >= 20 required (.nvmrc pins 22).
+  "name": "design-mcp-server",
+  "main": "src/worker.ts",
+  "compatibility_date": "2025-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  }
+  // Provider secrets (wrangler secret put) — never commit values:
+  // - FLATICON_API_KEY (flaticon provider; server stays up without it, provider disabled)
+}
