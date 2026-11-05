@@ -52,7 +52,7 @@ describe("createDesignServer", () => {
     await client.close();
   });
 
-  test("list_providers lists all ten providers; flaticon is NOT CONFIGURED without a key", async () => {
+  test("list_providers lists all eleven providers; flaticon is NOT CONFIGURED without a key", async () => {
     const client = await connectClient();
     const text = await callText(client, "list_providers");
     for (const name of [
@@ -62,6 +62,7 @@ describe("createDesignServer", () => {
       "wikimedia",
       "storyset",
       "flaticon",
+      "flaticon-web",
       "pexels",
       "unsplash",
       "pixabay",
@@ -71,7 +72,7 @@ describe("createDesignServer", () => {
     }
     expect(text).toContain("- flaticon [NOT CONFIGURED]");
     expect(text).toContain("FLATICON_API_KEY");
-    expect(text).toContain("Total: 10 providers (5 ready)");
+    expect(text).toContain("Total: 11 providers (6 ready)");
     await client.close();
   });
 
@@ -82,11 +83,19 @@ describe("createDesignServer", () => {
     await client.close();
   });
 
+  test("list_providers flags flaticon-web as experimental", async () => {
+    const client = await connectClient();
+    const text = await callText(client, "list_providers");
+    expect(text).toContain("- flaticon-web [READY]");
+    expect(text).toContain("Experimental: unofficial web access, no API key");
+    await client.close();
+  });
+
   test("with FLATICON_API_KEY set, flaticon reports READY", async () => {
     const client = await connectClient({ FLATICON_API_KEY: "test-key" });
     const text = await callText(client, "list_providers");
     expect(text).toContain("- flaticon [READY]");
-    expect(text).toContain("Total: 10 providers (6 ready)");
+    expect(text).toContain("Total: 11 providers (7 ready)");
     await client.close();
   });
 });

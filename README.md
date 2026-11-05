@@ -2,16 +2,16 @@
 
 A multi-provider **design-asset MCP server** on Cloudflare Workers. One MCP
 endpoint serves icons, illustrations, stock photos, logos and emoji from
-ten sources, each hidden behind a single provider seam — adding a source
+eleven sources, each hidden behind a single provider seam — adding a source
 never touches the core.
 
 The architecture is asset-finder-mcp's (MIT): one unified `Asset` shape and
 a two-method `Provider` seam (`search` / `getById`), with cross-provider
 tools on top. What stayed ours is the deployment shape — a stateless
 Cloudflare Worker over Streamable HTTP, env-per-request configuration, PR
-preview deployments — and three providers (Wikimedia Commons, Flaticon,
-Storyset) ported from this project's previous root. See
-[THIRD_PARTY.md](THIRD_PARTY.md) for attribution and the
+preview deployments — and the providers ported or added on this root
+(Wikimedia Commons, Flaticon, Storyset, and the experimental Flaticon-web).
+See [THIRD_PARTY.md](THIRD_PARTY.md) for attribution and the
 Acknowledgements at the end of this file.
 
 ## Architecture
@@ -39,6 +39,7 @@ src/
     openmoji.ts          OpenMoji (from asset-finder-mcp)
     wikimedia.ts         Wikimedia Commons adapter → wikimedia-core.ts (MediaWiki API)
     flaticon.ts          Flaticon adapter → flaticon-core.ts (API v3 auth + downloads)
+    flaticon-web.ts      Flaticon-web adapter → flaticon-web-core.ts (EXPERIMENTAL: web pages + public CDN, no key)
     storyset.ts          Storyset adapter → storyset-core.ts (scraping + SVG helpers)
     pexels.ts            Pexels (from asset-finder-mcp)
     unsplash.ts          Unsplash (from asset-finder-mcp)
@@ -71,6 +72,7 @@ else lives on the two-method seam.
 | `wikimedia` | icons, illustrations | — | Open-licensed SVGs from Wikimedia Commons, official MediaWiki API |
 | `storyset` | illustrations | — | storyset.com illustrations + native `storyset_*` tools |
 | `flaticon` | icons | `FLATICON_API_KEY` | Flaticon API v3; attribution required, author kept on every asset |
+| `flaticon-web` | icons | — | **Experimental**: Flaticon via its public web pages + CDN, no API key; may break or be blocked at any time (see below) |
 | `pexels` | stock photos | `PEXELS_API_KEY` | |
 | `unsplash` | stock photos | `UNSPLASH_ACCESS_KEY` | |
 | `pixabay` | photos, vectors, illustrations | `PIXABAY_API_KEY` | |
@@ -84,11 +86,28 @@ from upstream because it works when the endpoint cooperates, and
 `list_providers` flags it verbatim. Wikimedia Commons is the stable
 keyless SVG source on this server.
 
+**Flaticon-web is experimental.** It reaches Flaticon with no API key:
+search parses the public search pages (`/search?word=…`, anchored on
+icon-page links and CDN image URLs, not CSS classes), and `getById`
+builds image URLs from the public CDN pattern
+(`cdn-icons-png.flaticon.com/<size>/<floor(id/1000)>/<id>.png`, PNG
+only — SVG stays behind Flaticon's gated download flow). The honesty
+label matters: flaticon.com's bot filter refuses many networks
+outright — from this project's own sandbox, every www page returns
+HTTP 403 with its security-filter page, so `search` throws a named
+block error there (the merged tools isolate it and other providers
+answer normally), while the CDN itself is a plain public CDN and
+`getById` verifies live (real ids resolve, unknown ids 404 → null).
+Attribution is unchanged: assets carry the Flaticon license and, when
+the page names one, the author. Prefer `flaticon` (official API) when
+a key is available.
+
 ## Tools
 
-Cross-provider: `search_icons` (Iconify + Flaticon), `search_vectors`
-(Wikimedia Commons + SVG Repo), `search_emoji`, `search_logos`,
-`search_stock_photos`, `suggest_asset`, `get_asset`, `list_providers`.
+Cross-provider: `search_icons` (Iconify + Flaticon + experimental
+Flaticon-web), `search_vectors` (Wikimedia Commons + SVG Repo),
+`search_emoji`, `search_logos`, `search_stock_photos`, `suggest_asset`,
+`get_asset`, `list_providers`.
 
 Storyset native (via the escape hatch): `storyset_search`,
 `storyset_get_illustration`, `storyset_download`,
@@ -176,7 +195,7 @@ repositories:
 
 - **Erfangit23/asset-finder-mcp** (MIT) — the architectural base of this
   root: the unified Asset model, the Provider seam, the utility modules,
-  the cross-provider tools, and seven of the ten providers.
+  the cross-provider tools, and seven of the providers.
 - **better-auth/better-icons** (MIT) — the original Iconify Worker code
   this project was first seeded from; its Cloudflare Worker MCP pattern
   (Streamable HTTP transport, Iconify tooling) underlies `src/worker.ts`.

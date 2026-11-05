@@ -35,7 +35,7 @@ export function registerSuggestTool(server: McpServer, providers: Provider[]) {
         // Use preferred type to select providers
         switch (preferred_type) {
           case "icon":
-            providersToSearch = providers.filter((p) => ["iconify", "flaticon", "svgrepo"].includes(p.name) && p.available);
+            providersToSearch = providers.filter((p) => ["iconify", "flaticon", "flaticon-web", "svgrepo"].includes(p.name) && p.available);
             break;
           case "logo":
             providersToSearch = providers.filter((p) => ["logo-dev"].includes(p.name) && p.available);
@@ -64,7 +64,7 @@ export function registerSuggestTool(server: McpServer, providers: Provider[]) {
           providersToSearch.push(...providers.filter((p) => ["logo-dev"].includes(p.name) && p.available));
         }
         if (iconKeywords.some((k) => lowerDesc.includes(k)) || !providersToSearch.length) {
-          providersToSearch.push(...providers.filter((p) => ["iconify", "flaticon"].includes(p.name) && p.available));
+          providersToSearch.push(...providers.filter((p) => ["iconify", "flaticon", "flaticon-web"].includes(p.name) && p.available));
         }
         if (emojiKeywords.some((k) => lowerDesc.includes(k))) {
           providersToSearch.push(...providers.filter((p) => ["openmoji"].includes(p.name) && p.available));
