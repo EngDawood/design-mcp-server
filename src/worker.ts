@@ -6,20 +6,20 @@
  *   GET  /                  Service info (JSON, incl. providers)
  *   GET  /health            Health check (JSON)
  *   ALL  /mcp               MCP Streamable HTTP endpoint (stateless)
- *   GET  /api/providers     Registered providers + enabled state (JSON)
+ *   GET  /api/providers     Registered providers + availability (JSON)
  *
  * MCP client config:
  *   { "mcpServers": { "design-mcp-server": { "url": "https://design-mcp-server.<account>.workers.dev/mcp" } } }
  *
- * All providers live behind the seam in src/core/provider.ts; this file
- * only routes HTTP. Provider secrets come from Worker env (wrangler
- * secret put) — a provider whose keys are absent is disabled, never fatal.
+ * All providers live behind the seam in src/types.ts; this file only
+ * routes HTTP. Provider secrets come from Worker env (wrangler secret
+ * put) — a provider whose keys are absent is reported as not configured,
+ * never fatal.
  */
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { SERVER_NAME, VERSION } from "./constants.js";
-import { createDesignServer } from "./server.js";
-import { listProviderSummaries } from "./core/registry.js";
-import type { ProviderEnv } from "./core/provider.js";
+import { buildProviders, createDesignServer } from "./server.js";
+import type { ProviderEnv } from "./types.js";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -41,6 +41,15 @@ function withCors(res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
+function providerSummaries(env: ProviderEnv) {
+  return buildProviders(env).map((p) => ({
+    name: p.name,
+    available: p.available,
+    ...(p.description ? { description: p.description } : {}),
+    ...(p.note ? { note: p.note } : {}),
+  }));
+}
+
 export default {
   async fetch(request: Request, env: ProviderEnv): Promise<Response> {
     const url = new URL(request.url);
@@ -56,9 +65,9 @@ export default {
         name: SERVER_NAME,
         version: VERSION,
         description:
-          "Multi-provider design-asset MCP server: icons, illustrations and more behind one provider seam.",
+          "Multi-provider design-asset MCP server: icons, illustrations, photos and more behind one provider seam.",
         mcp_endpoint: `${url.origin}/mcp`,
-        providers: listProviderSummaries(env),
+        providers: providerSummaries(env),
         rest: {
           providers: `${url.origin}/api/providers`,
         },
@@ -77,7 +86,7 @@ export default {
     }
 
     if (path === "/api/providers") {
-      return json({ providers: listProviderSummaries(env) });
+      return json({ providers: providerSummaries(env) });
     }
 
     return json({ error: "Not found", routes: ["/", "/health", "/mcp", "/api/providers"] }, 404);
