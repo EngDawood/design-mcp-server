@@ -15,9 +15,11 @@ export function registerSearchTools(server: McpServer, providers: Provider[]) {
   // [design-mcp-server] Upstream searched Iconify only; on this root the
   // icon tool also queries Flaticon (when configured), merged into one
   // formatted result — the cross-provider model working as intended.
+  // flaticon-web joins too: keyless, but experimental — its failures are
+  // isolated per provider below, never fatal to the merged result.
   server.tool(
     "search_icons",
-    "Search for icons from 200,000+ icons across 150+ icon sets (Iconify), plus Flaticon when configured. Returns SVG/PNG icons with license info. Perfect for finding UI icons, app icons, and symbols.",
+    "Search for icons from 200,000+ icons across 150+ icon sets (Iconify), plus Flaticon when configured (official API, or the experimental keyless flaticon-web provider). Returns SVG/PNG icons with license info. Perfect for finding UI icons, app icons, and symbols.",
     {
       query: z.string().describe("Search term for icons (e.g. 'settings gear', 'home', 'user avatar')"),
       limit: z.number().optional().default(10).describe("Max results per provider (default 10)"),
@@ -25,7 +27,7 @@ export function registerSearchTools(server: McpServer, providers: Provider[]) {
     },
     async ({ query, limit, license }) => {
       const iconProviders = providers.filter(
-        (p) => ["iconify", "flaticon"].includes(p.name) && p.available
+        (p) => ["iconify", "flaticon", "flaticon-web"].includes(p.name) && p.available
       );
       if (iconProviders.length === 0) {
         return { content: [{ type: "text", text: "No icon providers available." }] };
