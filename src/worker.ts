@@ -3,10 +3,13 @@
  * Streamable HTTP, plus small REST endpoints for quick checks.
  *
  * Routes:
- *   GET  /                  Service info (JSON, incl. providers)
+ *   GET  /                  Service info (JSON, incl. providers) — or the
+ *                           HTML landing page for browsers (src/frontend/)
  *   GET  /health            Health check (JSON)
  *   ALL  /mcp               MCP Streamable HTTP endpoint (stateless)
  *   GET  /api/providers     Registered providers + availability (JSON)
+ *   GET  /providers, /tools, /playground, /docs
+ *                           HTML frontend pages (src/frontend/)
  *
  * MCP client config:
  *   { "mcpServers": { "design-mcp-server": { "url": "https://design-mcp-server.<account>.workers.dev/mcp" } } }
@@ -18,6 +21,7 @@
  */
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { SERVER_NAME, VERSION } from "./constants.js";
+import { handleFrontend } from "./frontend/index.js";
 import { buildProviders, createDesignServer } from "./server.js";
 import type { ProviderEnv } from "./types.js";
 
@@ -58,6 +62,17 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
+
+    // HTML frontend (src/frontend/): returns null for every non-frontend
+    // path — and for "/" when the client asks for JSON — so the JSON and
+    // MCP routing below keeps its exact behavior.
+    const frontend = handleFrontend(
+      path,
+      env,
+      url.origin,
+      request.headers.get("Accept") ?? "",
+    );
+    if (frontend) return withCors(frontend);
 
     if (path === "/" || path === "/health") {
       return json({
