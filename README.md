@@ -169,6 +169,23 @@ asset-finder shape won; the mapping for anyone diffing old payloads:
 | `assetUrl` / `pageUrl` | `url` / `downloadUrl` / `sourceUrl` |
 | Per-provider tools only (`iconify_search_icons`, …) | Cross-provider tools (`search_icons`, `get_asset`, …); per-provider tools survive only via the escape hatch (Storyset) |
 
+## Frontend
+
+The Worker also serves five HTML pages from `src/frontend/`, behind one
+small interface — `handleFrontend(path, env, origin, accept)` — which
+returns `null` for every non-frontend path, so the JSON routes
+(`/health`, `/api/providers`), `/mcp` and the 404 keep their exact
+behavior. Templates are TypeScript template literals with inline CSS/JS:
+no build step, no external assets.
+
+| Route | Page |
+|---|---|
+| `/` | Landing — live status and version, the copyable MCP endpoint, live provider/tool counts, install snippets (browsers get HTML; `Accept: application/json` still gets the JSON service info) |
+| `/providers` | Live provider cards from the registry for the request's env (name, ready/not-configured, description and note where the provider seam exposes them) |
+| `/tools` | The real tool catalog — the eight cross-provider tools plus Storyset's five native tools, with parameters from their zod schemas and an example call each |
+| `/playground` | Live Iconify search in the browser against the public Iconify API; clicking a result copies its `get_asset` id (`iconify:<prefix>:<name>`) or its SVG |
+| `/docs` | Connect guide, the `wrangler secret put` list from `src/config.ts`, how to add a provider, and an architecture overview |
+
 ## Acknowledgements
 
 This codebase was built based on / derived from the following upstream

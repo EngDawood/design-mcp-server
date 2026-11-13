@@ -3,7 +3,7 @@ import { createProviders } from "../src/providers/registry.js";
 import { loadConfig } from "../src/config.js";
 
 describe("createProviders — the registry", () => {
-  test("assembles all ten providers with unique names", () => {
+  test("assembles all eleven providers with unique names", () => {
     const providers = createProviders(loadConfig({}));
     const names = providers.map((p) => p.name);
     expect(names).toEqual([
@@ -13,6 +13,7 @@ describe("createProviders — the registry", () => {
       "wikimedia",
       "storyset",
       "flaticon",
+      "flaticon-web",
       "pexels",
       "unsplash",
       "pixabay",
@@ -23,7 +24,7 @@ describe("createProviders — the registry", () => {
 
   test("keyless providers are available; keyed ones wait for config", () => {
     const byName = new Map(createProviders(loadConfig({})).map((p) => [p.name, p.available]));
-    for (const name of ["iconify", "svgrepo", "openmoji", "wikimedia", "storyset"]) {
+    for (const name of ["iconify", "svgrepo", "openmoji", "wikimedia", "storyset", "flaticon-web"]) {
       expect(byName.get(name)).toBe(true);
     }
     for (const name of ["flaticon", "pexels", "unsplash", "pixabay", "logo-dev"]) {
@@ -35,5 +36,11 @@ describe("createProviders — the registry", () => {
     const svgrepo = createProviders(loadConfig({})).find((p) => p.name === "svgrepo");
     expect(svgrepo!.note).toContain("Experimental");
     expect(svgrepo!.note).toContain("no official API");
+  });
+
+  test("flaticon-web carries its experimental note", () => {
+    const web = createProviders(loadConfig({})).find((p) => p.name === "flaticon-web");
+    expect(web!.note).toContain("Experimental");
+    expect(web!.note).toContain("no API key");
   });
 });

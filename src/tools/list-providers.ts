@@ -110,6 +110,11 @@ function getProviderInfo(name: string) {
       envVar: "FLATICON_API_KEY",
       keyUrl: "https://developer.flaticon.com/",
     },
+    "flaticon-web": {
+      description: "Millions of icons from Flaticon via its public web pages — EXPERIMENTAL keyless access, no API key",
+      types: ["icon"],
+      apiKeyRequired: false,
+    },
     storyset: {
       description: "Free illustrations from storyset.com — plus native storyset_* tools for download, palette extraction and SVG recoloring",
       types: ["illustration"],

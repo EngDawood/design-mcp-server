@@ -13,6 +13,7 @@ import { OpenMojiProvider } from "./openmoji.js";
 import { WikimediaProvider } from "./wikimedia.js";
 import { StorysetProvider } from "./storyset.js";
 import { FlaticonProvider } from "./flaticon.js";
+import { FlaticonWebProvider } from "./flaticon-web.js";
 import { PexelsProvider } from "./pexels.js";
 import { UnsplashProvider } from "./unsplash.js";
 import { PixabayProvider } from "./pixabay.js";
@@ -26,6 +27,7 @@ export function createProviders(config: ProviderConfig): Provider[] {
     new WikimediaProvider(),
     new StorysetProvider(),
     new FlaticonProvider(config),
+    new FlaticonWebProvider(),
     new PexelsProvider(config),
     new UnsplashProvider(config),
     new PixabayProvider(config),
